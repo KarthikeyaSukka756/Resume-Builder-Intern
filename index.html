@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ResumeForge — Interactive Resume Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">◈</span>
+      <span class="logo-text">ResumeForge</span>
+    </div>
+    <div class="header-actions">
+      <div class="theme-selector">
+        <span class="theme-label">Theme</span>
+        <div class="theme-dots">
+          <button class="theme-dot active" data-theme="navy"    style="background:#1e3a5f" title="Navy"></button>
+          <button class="theme-dot"        data-theme="emerald" style="background:#065f46" title="Emerald"></button>
+          <button class="theme-dot"        data-theme="crimson" style="background:#7f1d1d" title="Crimson"></button>
+          <button class="theme-dot"        data-theme="violet"  style="background:#4c1d95" title="Violet"></button>
+          <button class="theme-dot"        data-theme="slate"   style="background:#1e293b" title="Slate"></button>
+        </div>
+      </div>
+      <button class="btn-download" id="downloadBtn" onclick="downloadPDF()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export PDF
+      </button>
+    </div>
+  </div>
+  <!-- Progress bar -->
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill"></div>
+    <span class="progress-label" id="progressLabel">0% Complete</span>
+  </div>
+</header>
+
+<!-- ── MAIN LAYOUT ── -->
+<main class="app-body">
+
+  <!-- LEFT: FORM PANEL -->
+  <aside class="form-panel" id="formPanel">
+
+    <!-- Personal Info -->
+    <section class="form-section">
+      <div class="section-header">
+        <span class="section-icon">👤</span>
+        <h2>Personal Info</h2>
+      </div>
+      <div class="field-grid">
+        <div class="field full">
+          <label>Full Name</label>
+          <input type="text" id="name" placeholder="e.g. Karthikeya Sukka" oninput="update()" />
+        </div>
+        <div class="field full">
+          <label>Professional Title</label>
+          <input type="text" id="title" placeholder="e.g. Web Developer" oninput="update()" />
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="you@email.com" oninput="update()" />
+        </div>
+        <div class="field">
+          <label>Phone</label>
+          <input type="text" id="phone" placeholder="+91 9876543210" oninput="update()" />
+        </div>
+        <div class="field">
+          <label>Location</label>
+          <input type="text" id="location" placeholder="Hyderabad, India" oninput="update()" />
+        </div>
+        <div class="field">
+          <label>LinkedIn / Portfolio</label>
+          <input type="text" id="linkedin" placeholder="linkedin.com/in/..." oninput="update()" />
+        </div>
+        <div class="field full">
+          <label>Professional Summary</label>
+          <textarea id="summary" rows="3" placeholder="Brief overview of your background and goals..." oninput="update()"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- Skills -->
+    <section class="form-section">
+      <div class="section-header">
+        <span class="section-icon">⚡</span>
+        <h2>Skills</h2>
+        <button class="btn-add" onclick="addSkill()">+ Add</button>
+      </div>
+      <div id="skillsList"></div>
+    </section>
+
+    <!-- Experience -->
+    <section class="form-section">
+      <div class="section-header">
+        <span class="section-icon">💼</span>
+        <h2>Experience</h2>
+        <button class="btn-add" onclick="addExperience()">+ Add</button>
+      </div>
+      <div id="experienceList"></div>
+    </section>
+
+    <!-- Education -->
+    <section class="form-section">
+      <div class="section-header">
+        <span class="section-icon">🎓</span>
+        <h2>Education</h2>
+        <button class="btn-add" onclick="addEducation()">+ Add</button>
+      </div>
+      <div id="educationList"></div>
+    </section>
+
+    <!-- Projects -->
+    <section class="form-section">
+      <div class="section-header">
+        <span class="section-icon">🚀</span>
+        <h2>Projects</h2>
+        <button class="btn-add" onclick="addProject()">+ Add</button>
+      </div>
+      <div id="projectsList"></div>
+    </section>
+
+  </aside>
+
+  <!-- RIGHT: PREVIEW PANEL -->
+  <div class="preview-panel">
+    <div class="preview-label">
+      <span>Live Preview</span>
+      <span class="preview-badge">A4</span>
+    </div>
+    <div class="preview-scroll">
+      <div class="resume-paper" id="resumeOutput">
+
+        <!-- RESUME CONTENT -->
+        <div class="r-header" id="r-header">
+          <div class="r-name-block">
+            <h1 id="r-name">Your Name</h1>
+            <p id="r-title" class="r-title">Professional Title</p>
+          </div>
+          <div class="r-contact" id="r-contact"></div>
+        </div>
+
+        <div class="r-accent-bar" id="r-accent-bar"></div>
+
+        <div class="r-body">
+          <div class="r-main">
+            <div id="r-summary-block" class="r-section" style="display:none">
+              <h3 class="r-section-title">Summary</h3>
+              <p id="r-summary"></p>
+            </div>
+            <div id="r-exp-block" class="r-section" style="display:none">
+              <h3 class="r-section-title">Experience</h3>
+              <div id="r-exp-list"></div>
+            </div>
+            <div id="r-proj-block" class="r-section" style="display:none">
+              <h3 class="r-section-title">Projects</h3>
+              <div id="r-proj-list"></div>
+            </div>
+          </div>
+          <div class="r-side">
+            <div id="r-skills-block" class="r-section" style="display:none">
+              <h3 class="r-section-title">Skills</h3>
+              <div id="r-skills-list"></div>
+            </div>
+            <div id="r-edu-block" class="r-section" style="display:none">
+              <h3 class="r-section-title">Education</h3>
+              <div id="r-edu-list"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
